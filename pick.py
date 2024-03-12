@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 # from sklearn.neighbors import KNeighborsClassifier
 # from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
-from xgboost import XGBClassifier
+# from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
 
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler, MinMaxScaler, Normalizer
@@ -252,7 +252,7 @@ if if_run:
         # "GaussianNB()",
         "SVC(kernel='rbf', probability=True)",
         # "LGBMClassifier()",
-        "XGBClassifier(max_depth=5, learning_rate=0.1, objective='binary:logistic', nthread=-1, scale_pos_weight = len(y[y == 0])/len(y[y == 1]))",
+        # "XGBClassifier(max_depth=5, learning_rate=0.1, objective='binary:logistic', nthread=-1, scale_pos_weight = len(y[y == 0])/len(y[y == 1]))",
         # "KNeighborsClassifier(n_neighbors=5)"
     ]
 
@@ -264,7 +264,7 @@ if if_run:
         # 'Bayes',
         'SVM',
         # 'LightGBM',
-        'XGBoost',
+        # 'XGBoost',
         # 'KNeighbor',
     ]
 
@@ -300,13 +300,14 @@ if if_run:
         process_text = 'Model Running... ' + '{:.1%}'.format((j+5)/L) + ' (' + str(j+5)+ '/' + str(L) + ')'
         bar.progress((j+5)/L, text=process_text)
 
-        if model_name == 'XGBoost':
-            importance = classifier.feature_importances_
+        if model_name == 'Logistic':
+            importance = classifier.coef_
+            feature_names = classifier.feature_names_in_
     outcome.index = ['ACC', 'AUC', 'SEC', 'SCF', 'PCS', 'NPV']
 
-    # ttt = 11
-    # process_text = 'Done! ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
-    # bar.progress(ttt/L, text=process_text)
+    ttt = 7
+    process_text = 'Done! ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
+    bar.progress(ttt/L, text=process_text)
 
     st.table(outcome)
 
@@ -321,4 +322,4 @@ if if_run:
         value=best_auc, 
     )
 
-    st.table(pd.DataFrame(importance, index=columns_input, columns=['Importance']).sort_values(by='Importance', ascending=False))
+    st.table(pd.DataFrame(importance, columns=columns_input, index=['Coef of Logis']).T.sort_values(by='Coef of Logis', ascending=False))
