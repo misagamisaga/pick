@@ -1,0 +1,7 @@
+matplotlib
+scikit-learn
+Pillow==9.4.0
+seaborn
+pandas
+xgboost
+numpy
