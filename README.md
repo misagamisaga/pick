@@ -1,3 +1,3 @@
-# GC_app
+# pick
 
-This is a app create by Gang Chen lab in Whenzhou Medical University. 
+This is a app for picking outputs from data
