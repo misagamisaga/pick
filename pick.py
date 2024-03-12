@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+# from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import MLPClassifier
+# from sklearn.naive_bayes import GaussianNB
+# from sklearn.neighbors import KNeighborsClassifier
+# from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
@@ -208,7 +208,7 @@ st.markdown('---')
 if if_run:
     random_seed = 43
 
-    L = 11
+    L = 7
     process_text = 'Read Data... ' + '{:.1%}'.format(0/L) + ' (0/' + str(L) + ')'
     bar = st.progress(0.0, text=process_text)
     
@@ -247,9 +247,9 @@ if if_run:
     models = [
         "LogisticRegression(max_iter=5000)",
         # "DecisionTreeClassifier()",
-        "RandomForestClassifier()",
-        "MLPClassifier()",
-        "GaussianNB()",
+        # "RandomForestClassifier()",
+        # "MLPClassifier()",
+        # "GaussianNB()",
         "SVC(kernel='rbf', probability=True)",
         # "LGBMClassifier()",
         "XGBClassifier(max_depth=5, learning_rate=0.1, objective='binary:logistic', nthread=-1, scale_pos_weight = len(y[y == 0])/len(y[y == 1]))",
@@ -259,9 +259,9 @@ if if_run:
     model_names = [
         'Logistic',
         # 'Decision Tree',
-        'Random Forest',
-        'Neural Network',
-        'Bayes',
+        # 'Random Forest',
+        # 'Neural Network',
+        # 'Bayes',
         'SVM',
         # 'LightGBM',
         'XGBoost',
@@ -304,9 +304,9 @@ if if_run:
             importance = classifier.feature_importances_
     outcome.index = ['ACC', 'AUC', 'SEC', 'SCF', 'PCS', 'NPV']
 
-    ttt = 11
-    process_text = 'Done! ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
-    bar.progress(ttt/L, text=process_text)
+    # ttt = 11
+    # process_text = 'Done! ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
+    # bar.progress(ttt/L, text=process_text)
 
     st.table(outcome)
 
