@@ -250,7 +250,7 @@ if if_run:
         # "RandomForestClassifier()",
         # "MLPClassifier()",
         # "GaussianNB()",
-        "SVC(kernel='rbf', probability=True)",
+        "SVC(kernel='rbf', probability=True, random_state=0)",
         # "LGBMClassifier()",
         # "XGBClassifier(max_depth=5, learning_rate=0.1, objective='binary:logistic', nthread=-1, scale_pos_weight = len(y[y == 0])/len(y[y == 1]))",
         # "KNeighborsClassifier(n_neighbors=5)"
