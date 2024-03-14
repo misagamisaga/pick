@@ -245,7 +245,7 @@ if if_run:
     st.title('Machine Learning')
         
     models = [
-        "LogisticRegression(max_iter=5000)",
+        "LogisticRegression(max_iter=5000, solver='liblinear', random_state=0)",
         # "DecisionTreeClassifier()",
         # "RandomForestClassifier()",
         # "MLPClassifier()",
