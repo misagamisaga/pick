@@ -223,6 +223,9 @@ if_run = st.button('Run !', key=102)
 st.markdown('---')
 
 if if_run:
+
+    st.title('Machine Learning')
+
     random_seed = 43
 
     L = 7
@@ -267,10 +270,6 @@ if if_run:
     y_test = data_test[aim]
     X_outer = data_outer[selected_cols]
     y_outer = data_outer[aim]
-
-    st.title('Machine Learning')
-
-    # st.magic(y)
         
     models = [
         "LogisticRegression(max_iter=5000)",
@@ -298,8 +297,6 @@ if if_run:
 
     outcome = pd.DataFrame()
 
-
-
     columns_input = X.columns
     for j in range(0, len(models)):
         classifier = eval(models[j])
@@ -308,10 +305,12 @@ if if_run:
         classifier.fit(X, y)
 
         model_name = model_names[j]
+        out_df_train = get_out_df(classifier, X, y, model_name+"_train")
         out_df_inner = get_out_df(classifier, X_test, y_test, model_name+"_inner")
         out_df_outer = get_out_df(classifier, X_outer, y_outer, model_name+"_outer")
-
-        out_df_audf = pd.concat([out_df_inner, out_df_outer], axis=1)
+        
+        out_df_budf = pd.concat([out_df_train, out_df_inner], axis=1)
+        out_df_audf = pd.concat([out_df_budf, out_df_outer], axis=1)
         # 保存模型指标值
         
         outcome = pd.concat([outcome, out_df_audf], axis=1)  # 这里是保存了每个模型的指标值的，如果需要可以拿来输出
@@ -328,17 +327,28 @@ if if_run:
     process_text = 'Done! ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
     bar.progress(ttt/L, text=process_text)
 
+    col111, col221, col331 = st.columns(3)
+
+    with col111:
+        st.metric(
+            label='Best AUC in TRAIN-SET', 
+            value=outcome.loc[['AUC'], ['Logistic_train', 'SVM_train']].max(axis=1).item(), 
+        )
+    with col221:
+        st.metric(
+            label='Best AUC in INNER-TEST-SET', 
+            value=outcome.loc[['AUC'], ['Logistic_inner', 'SVM_inner']].max(axis=1).item(), 
+        )
+    with col331:
+        st.metric(
+            label='Best AUC in OUTER-TEST-SET', 
+            value=outcome.loc[['AUC'], ['Logistic_outer', 'SVM_outer']].max(axis=1).item(), 
+        )
+
     st.table(outcome)
 
-    st.markdown('---')
+    st.markdown("---")
 
-    st.markdown('## Model outputs')
-
-    aucs = outcome.loc[['AUC'], :]
-    best_auc = aucs.max(axis=1).item()
-    st.metric(
-        label='Best AUC Outcome', 
-        value=best_auc, 
-    )
+    st.markdown("## Coef of Logistic")
 
     st.table(pd.DataFrame(importance, columns=columns_input, index=['Coef of Logis']).T.sort_values(by='Coef of Logis', ascending=False))
