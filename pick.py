@@ -296,13 +296,15 @@ if if_run:
     ]
 
     outcome = pd.DataFrame()
-
+    infos_list = []
     columns_input = X.columns
     for j in range(0, len(models)):
         classifier = eval(models[j])
         model_name = model_names[j]
         
         classifier.fit(X, y)
+
+        infos_list.append(classifier.get_params())
 
         model_name = model_names[j]
         out_df_train = get_out_df(classifier, X, y, model_name+"_train")
@@ -327,22 +329,34 @@ if if_run:
     process_text = 'Done! ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
     bar.progress(ttt/L, text=process_text)
 
-    col111, col221, col331 = st.columns(3)
+    st.write("  ")
 
+    col_001, col111, col221, col331 = st.columns(4)
+
+    if outcome.loc['AUC', 'SVM_inner'] > outcome.loc['AUC', 'Logistic_inner']:
+        out_choose_one = "SVM"
+    else:
+        out_choose_one = "Logistic"
+    
+    with col_001:
+        st.metric(
+            label='Best MODEL', 
+            value=out_choose_one
+        )
     with col111:
         st.metric(
             label='Best AUC in TRAIN-SET', 
-            value=outcome.loc[['AUC'], ['Logistic_train', 'SVM_train']].max(axis=1).item(), 
+            value=outcome.loc['AUC', out_choose_one+'_train']
         )
     with col221:
         st.metric(
             label='Best AUC in INNER-TEST-SET', 
-            value=outcome.loc[['AUC'], ['Logistic_inner', 'SVM_inner']].max(axis=1).item(), 
+            value=outcome.loc['AUC', out_choose_one+'_inner']
         )
     with col331:
         st.metric(
             label='Best AUC in OUTER-TEST-SET', 
-            value=outcome.loc[['AUC'], ['Logistic_outer', 'SVM_outer']].max(axis=1).item(), 
+            value=outcome.loc['AUC', out_choose_one+'_outer']
         )
 
     st.table(outcome)
@@ -352,3 +366,5 @@ if if_run:
     st.markdown("## Coef of Logistic")
 
     st.table(pd.DataFrame(importance, columns=columns_input, index=['Coef of Logis']).T.sort_values(by='Coef of Logis', ascending=False))
+
+    st.markdown("---")
