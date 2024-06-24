@@ -200,13 +200,14 @@ with col2:
          'RETINA whole thick 03'], 
         ['RETINA I thick 13', 'RETINA N thick 13', 'RETINA whole thick 13']
     )
-    selected_cols7 = st.multiselect(
-        'clinic', 
-        ['exopha', 'IOP', 'MD', 'CAS', 'spherical equivalent', 
-         'LogMAR', 'Age', 'Gender']
-    )
+    # 外院数据无临床数据
+    # selected_cols7 = st.multiselect(
+    #     'clinic', 
+    #     ['exopha', 'IOP', 'MD', 'spherical equivalent', 
+    #      'LogMAR', 'Age', 'Gender', 'CAS']  
+    # )
 
-selected_cols = selected_cols1 + selected_cols2 + selected_cols3 + selected_cols4 + selected_cols5 + selected_cols6 + selected_cols7 + selected_cols8
+selected_cols = selected_cols1 + selected_cols2 + selected_cols3 + selected_cols4 + selected_cols5 + selected_cols6 + selected_cols8 # + selected_cols7
 st.markdown('---')
 st.markdown("## Control the params")
 
@@ -229,7 +230,10 @@ if if_run:
     bar = st.progress(0.0, text=process_text)
     
     # data input
-    data = pd.read_csv('data4ML_V3.csv', index_col=0)
+    data = pd.read_csv('data4ML_V3.csv', index_col=0).drop(
+        ['exopha', 'IOP', 'MD', 'spherical equivalent', 
+        'LogMAR', 'Age', 'Gender', 'CAS'], axis=1
+    )
     data_outer = pd.read_csv('data_outer.csv', index_col=0)
     
     ttt = 1
@@ -265,6 +269,8 @@ if if_run:
     y_outer = data_outer[aim]
 
     st.title('Machine Learning')
+
+    # st.magic(y)
         
     models = [
         "LogisticRegression(max_iter=5000)",
