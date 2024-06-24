@@ -36,15 +36,14 @@ def SS_it(data_input_train, data_input_test, unproc_list=['Group'], SS_type='SS'
     for col in columns_proc:
         col_now = data_toprocess[col]
         if len(col_now[col_now==0]) + len(col_now[col_now==1]) == len(col_now):
-            # 如果是01变量
             index_01.append(col)
         else:
             index_SS.append(col)
 
-    # 变量处理_train
+
     data = data_input_train
     data_unprocess = data.loc[:,unproc_list]
-    # data_toprocess = data.drop(unproc_list, axis=1)
+
     data_01 = data.loc[:, index_01]
     data_SS = data.loc[:, index_SS]
     
@@ -60,15 +59,13 @@ def SS_it(data_input_train, data_input_test, unproc_list=['Group'], SS_type='SS'
     else:
         sccc = StandardScaler()
     
-    data_SSed = sccc.fit_transform(data_SS)  # 得到的data_SS是numpy.array格式
+    data_SSed = sccc.fit_transform(data_SS)
     data_SSed_df = pd.DataFrame(data_SSed, columns=column_SS, index=data.index)
 
     data_SS_train = pd.concat([data_unprocess, data_SSed_df, data_01], axis=1)
 
-    # 变量处理_test
     data = data_input_test
     data_unprocess = data.loc[:,unproc_list]
-    # data_toprocess = data.drop(unproc_list, axis=1)
     data_01 = data.loc[:, index_01]
     data_SS = data.loc[:, index_SS]
     
@@ -76,11 +73,11 @@ def SS_it(data_input_train, data_input_test, unproc_list=['Group'], SS_type='SS'
         data_01 = 2*(data_01-0.5)
 
     column_SS = data_SS.columns
-    # sccc = StandardScaler()
+
     if if_both_trainset_param:
         data_SSed = sccc.transform(data_SS)
     else:
-        data_SSed = sccc.fit_transform(data_SS)  # 得到的data_SS是numpy.array格式
+        data_SSed = sccc.fit_transform(data_SS)
     data_SSed_df = pd.DataFrame(data_SSed, columns=column_SS, index=data.index)
 
     data_SS_test = pd.concat([data_unprocess, data_SSed_df, data_01], axis=1)
@@ -112,6 +109,25 @@ def cut_traintest_set(df, aim='Group', random_st=0, cut_rate=0.2):
     data_test = pd.concat([data_test_0, data_test_1])
 
     return data_train, data_test
+
+def get_out_df(classifier, X_test0, y_test0, model_name):
+    # 模型测试结果
+    f_y_pred = classifier.predict(X_test0)
+    f_y_proba = classifier.predict_proba(X_test0)[:, 1]
+    f_y_true = y_test0
+
+    # 计算模型指标
+    f_acc = accuracy_score(f_y_true, f_y_pred)
+    tn, fp, fn, tp = confusion_matrix(f_y_true, f_y_pred).ravel()
+    f_auc = roc_auc_score(f_y_true, f_y_proba)
+    f_sec = tp / (tp + fn)
+    f_scf = tn / (fp + tn)
+    f_pcs = tp / (tp + fp)
+    f_npv = tn / (fn + tn)
+
+    audf = pd.DataFrame((f_acc, f_auc, f_sec, f_scf, f_pcs, f_npv), columns=[model_name])
+
+    return audf
 
 st.image(r'treeandawn_title.jpg')
 st.title(' 🩺 Data Check')
@@ -212,7 +228,9 @@ if if_run:
     process_text = 'Read Data... ' + '{:.1%}'.format(0/L) + ' (0/' + str(L) + ')'
     bar = st.progress(0.0, text=process_text)
     
+    # data input
     data = pd.read_csv('data4ML_V3.csv', index_col=0)
+    data_outer = pd.read_csv('data_outer.csv', index_col=0)
     
     ttt = 1
     process_text = 'Data Pre-Processing... ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
@@ -225,7 +243,9 @@ if if_run:
     process_text = 'Data Pre-Processing... ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
     bar.progress(ttt/L, text=process_text)
     
+    data_temp_ori_dddd = data_trainori.copy()
     data_trainori, data_test = SS_it(data_trainori, data_test, unproc_list=[aim], if_both_trainset_param=True)
+    data_temp_ori_dddd, data_outer = SS_it(data_temp_ori, data_outer, unproc_list=[aim], if_both_trainset_param=True)
     
     ttt = 3
     process_text = 'Data Pre-Processing... ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
@@ -241,16 +261,18 @@ if if_run:
     y = data_train[aim]
     X_test = data_test[selected_cols]
     y_test = data_test[aim]
+    X_outer = data_outer[selected_cols]
+    y_outer = data_outer[aim]
 
     st.title('Machine Learning')
         
     models = [
-        "LogisticRegression(max_iter=5000, solver='liblinear', random_state=0)",
+        "LogisticRegression(max_iter=5000)",
         # "DecisionTreeClassifier()",
         # "RandomForestClassifier()",
         # "MLPClassifier()",
         # "GaussianNB()",
-        "SVC(kernel='rbf', probability=True, random_state=0)",
+        "SVC(kernel='rbf', probability=True)",
         # "LGBMClassifier()",
         # "XGBClassifier(max_depth=5, learning_rate=0.1, objective='binary:logistic', nthread=-1, scale_pos_weight = len(y[y == 0])/len(y[y == 1]))",
         # "KNeighborsClassifier(n_neighbors=5)"
@@ -278,24 +300,15 @@ if if_run:
         model_name = model_names[j]
         
         classifier.fit(X, y)
-        
-        # 模型测试结果
-        f_y_pred = classifier.predict(X_test)
-        f_y_proba = classifier.predict_proba(X_test)[:, 1]
-        f_y_true = y_test
-        
-        # 计算模型指标
-        f_acc = accuracy_score(f_y_true, f_y_pred)
-        tn, fp, fn, tp = confusion_matrix(f_y_true, f_y_pred).ravel()
-        f_auc = roc_auc_score(f_y_true, f_y_proba)
-        f_sec = tp / (tp + fn)
-        f_scf = tn / (fp + tn)
-        f_pcs = tp / (tp + fp)
-        f_npv = tn / (fn + tn)
-        
+
+        model_name = model_names[j]
+        out_df_inner = get_out_df(classifier, X_test, y_test, model_name+"_inner")
+        out_df_outer = get_out_df(classifier, X_outer, y_outer, model_name+"_outer")
+
+        out_df_audf = pd.concat([out_df_inner, out_df_outer], axis=1)
         # 保存模型指标值
-        audf = pd.DataFrame((f_acc, f_auc, f_sec, f_scf, f_pcs, f_npv), columns=[model_names[j]])
-        outcome = pd.concat([outcome, audf], axis=1)  # 这里是保存了每个模型的指标值的，如果需要可以拿来输出
+        
+        outcome = pd.concat([outcome, out_df_audf], axis=1)  # 这里是保存了每个模型的指标值的，如果需要可以拿来输出
         
         process_text = 'Model Running... ' + '{:.1%}'.format((j+5)/L) + ' (' + str(j+5)+ '/' + str(L) + ')'
         bar.progress((j+5)/L, text=process_text)
