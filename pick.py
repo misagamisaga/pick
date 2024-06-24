@@ -245,7 +245,7 @@ if if_run:
     
     data_temp_ori_dddd = data_trainori.copy()
     data_trainori, data_test = SS_it(data_trainori, data_test, unproc_list=[aim], if_both_trainset_param=True)
-    data_temp_ori_dddd, data_outer = SS_it(data_temp_ori, data_outer, unproc_list=[aim], if_both_trainset_param=True)
+    data_temp_ori_dddd, data_outer = SS_it(data_temp_ori_dddd, data_outer, unproc_list=[aim], if_both_trainset_param=True)
     
     ttt = 3
     process_text = 'Data Pre-Processing... ' + '{:.1%}'.format(ttt/L) + ' (' + str(ttt)+ '/' + str(L) + ')'
