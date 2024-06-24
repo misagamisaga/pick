@@ -296,7 +296,7 @@ if if_run:
     ]
 
     outcome = pd.DataFrame()
-    infos_list = []
+    # infos_list = []
     columns_input = X.columns
     for j in range(0, len(models)):
         classifier = eval(models[j])
@@ -304,7 +304,7 @@ if if_run:
         
         classifier.fit(X, y)
 
-        infos_list.append(classifier.get_params())
+        # infos_list.append(classifier.get_params())
 
         model_name = model_names[j]
         out_df_train = get_out_df(classifier, X, y, model_name+"_train")
